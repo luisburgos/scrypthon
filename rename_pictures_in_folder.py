@@ -43,10 +43,13 @@ def renameImagesStartingAt(root_path):
     print ""
     print "Total files without modification:", total_files_not_modified
     print "Total files renamed:", total_files_modified
-    print "Total exceptions:", len(exception_at_paths)
-    print "Unable to rename:"
-    for exception in exception_at_paths:
-        print "-", exception
+
+    total_exceptions = len(exception_at_paths)
+    print "Total exceptions:", total_exceptions
+    if total_exceptions > 0:
+        print "Unable to rename:"
+        for exception in exception_at_paths:
+            print "-", exception
 
 def renameImages(path):
     images = list() 
@@ -60,6 +63,7 @@ def renameImages(path):
         try:
             image_opened = Image.open(full_path) 
             images.append(image_opened)
+            image_opened.close()
         except:
             exception_at_paths.append(full_path)
 
