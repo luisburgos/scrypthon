@@ -11,6 +11,7 @@ from PIL import Image
 
 total_files_not_modified = 0
 total_files_modified = 0
+exception_at_paths = []
 valid_images = [".jpg",".gif",".png",".tga", ".jpeg"]
 
 '''
@@ -42,6 +43,10 @@ def renameImagesStartingAt(root_path):
     print ""
     print "Total files without modification:", total_files_not_modified
     print "Total files renamed:", total_files_modified
+    print "Total exceptions:", len(exception_at_paths)
+    print "Unable to rename:"
+    for exception in exception_at_paths:
+        print "-", exception
 
 def renameImages(path):
     images = list() 
@@ -52,8 +57,11 @@ def renameImages(path):
             continue
 
         full_path = os.path.join(path, entry)
-        image_opened = Image.open(full_path)        
-        images.append(image_opened)
+        try:
+            image_opened = Image.open(full_path) 
+            images.append(image_opened)
+        except:
+            exception_at_paths.append(full_path)
 
     rename(images, path)
 
