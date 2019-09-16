@@ -34,6 +34,8 @@ Helpful links:
 def renameImagesStartingAt(root_path):
     directories = readDirectories(root_path)
     for directory in directories:
+        print "Renaming files at:", directory
+        print ""
         renameImages(directory)
 
     print "**************************************************************"
@@ -43,7 +45,7 @@ def renameImagesStartingAt(root_path):
 
 def renameImages(path):
     images = list() 
-    
+
     for entry in os.listdir(path):
         extension = os.path.splitext(entry)[1]
         if extension.lower() not in valid_images:
@@ -58,6 +60,9 @@ def renameImages(path):
 def readDirectories(dirName):
     directories = list()
 
+    if not os.path.isdir(dirName):
+        return directories
+
     listOfFile = os.listdir(dirName)
     
     # Iterate over all the entries
@@ -66,9 +71,10 @@ def readDirectories(dirName):
         fullPath = os.path.join(dirName, entry)
         # If entry is a directory then get the list of files in this directory 
         if os.path.isdir(fullPath):
-            directories.append(fullPath)
-            readDirectories(fullPath)
-
+            if not entry.startswith("."):
+                directories.append(fullPath)
+                directories = directories + readDirectories(fullPath)
+            
     return directories
             
 
