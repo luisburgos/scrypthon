@@ -28,6 +28,7 @@ Helpful links:
 - https://stackoverflow.com/questions/237079/how-to-get-file-creation-modification-date-times-in-python
 - https://www.pythonforbeginners.com/system/python-sys-argv
 - https://realpython.com/command-line-interfaces-python-argparse/
+- https://thispointer.com/python-how-to-get-list-of-files-in-directory-and-sub-directories/
 '''
 
 def renameImagesStartingAt(root_path):
@@ -52,7 +53,7 @@ def renameImages(path):
         image_opened = Image.open(full_path)        
         images.append(image_opened)
 
-    rename(images)
+    rename(images, path)
 
 def readDirectories(dirName):
     directories = list()
@@ -88,7 +89,7 @@ def get_time_name_from_locatime(date):
     
     return new_time.strftime(input_date_name_format)
 
-def rename(images):
+def rename(images, path):
     global total_files_not_modified 
     global total_files_modified
 
@@ -110,7 +111,7 @@ def rename(images):
             time_name = get_time_name_from_locatime(modified)
 
         # Example: 2013-05-05_23-20-42.jpg
-        new_name = "{}/{}{}".format(root_folder, time_name, extension.lower())
+        new_name = "{}/{}{}".format(path, time_name, extension.lower())
 
         if image_filename == new_name:
             print "No changes made for:", image_filename
@@ -125,9 +126,8 @@ def rename(images):
                 print "From:", image_filename
                 print "To:", new_name
 
-                #os.rename(image_filename, new_name)
-
-            total_files_modified += 1
+                os.rename(image_filename, new_name)
+                total_files_modified += 1
 
         print ""
 
