@@ -6,19 +6,24 @@ import exifread
 import datetime
 import platform
 import sys
+import argparse
 from PIL import Image
 
 '''
 Run:
 $ python rename_pictures_in_folder.py /path/to/folder
-$ python rename_pictures_in_folder.py /path/to/folder "%Y-%m-%d"
-$ python rename_pictures_in_folder.py /path/to/folder "%Y-%m-%d_%H-%M-%S"
+$ python rename_pictures_in_folder.py /path/to/folder --format %Y-%m-%d
+
+Run without executing rename:
+$ python rename_pictures_in_folder.py /path/to/folder --debug
+$ python rename_pictures_in_folder.py /path/to/folder --format %Y-%m-%d --debug
 
 Helpful links:
 - https://stackoverflow.com/questions/237079/how-to-get-file-creation-modification-date-times-in-python/39501288#39501288
 - https://timestamp.online/article/how-to-convert-timestamp-to-datetime-in-python
 - https://stackoverflow.com/questions/237079/how-to-get-file-creation-modification-date-times-in-python
 - https://www.pythonforbeginners.com/system/python-sys-argv
+- https://realpython.com/command-line-interfaces-python-argparse/
 '''
 
 def loadImages(path):
@@ -78,10 +83,16 @@ def rename(images):
             print "No changes made for:", image_filename
             total_files_not_modified += 1
         else:                
-            print "From:", image_filename
-            print "To:", new_name
+            if args.debug:
+                print "Skip renaming call for:", image_filename
+                continue
+            else:
+                print "Renaming"
+                print "From:", image_filename
+                print "To:", new_name
 
-            os.rename(image_filename, new_name)
+                #os.rename(image_filename, new_name)
+
             total_files_modified += 1
 
         print ""
@@ -105,16 +116,16 @@ input_date_name_format = ""
 
 print "Calling script with args:", sys.argv
 
-if len(sys.argv) == 3:
-    root_folder = sys.argv[1]
-    input_date_name_format = sys.argv[2]
-elif len(sys.argv) == 2:
-    root_folder = sys.argv[1]
-    input_date_name_format = "%Y-%m-%d_%H-%M-%S" 
-else:
-    print "MISSING ARGUMENTS"
-    print "Must pass the root folder at least"
-    sys.exit()
+parser = argparse.ArgumentParser()
+
+parser.add_argument('root', type=str, help='Root folder to traverse and rename')
+parser.add_argument('-f', '--format', type=str, default='%Y-%m-%d_%H-%M-%S', help='Date name format to use as new file name')
+parser.add_argument('-d', '--debug', action="store_true", default=False, help='Running with renaming files')
+
+args = parser.parse_args()
+
+root_folder = args.root
+input_date_name_format = args.format
 
 print ""
 print "Renaming files at:", root_folder
