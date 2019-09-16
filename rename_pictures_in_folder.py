@@ -9,6 +9,10 @@ import sys
 import argparse
 from PIL import Image
 
+total_files_not_modified = 0
+total_files_modified = 0
+valid_images = [".jpg",".gif",".png",".tga", ".jpeg"]
+
 '''
 Run:
 $ python rename_pictures_in_folder.py /path/to/folder
@@ -26,17 +30,46 @@ Helpful links:
 - https://realpython.com/command-line-interfaces-python-argparse/
 '''
 
-def loadImages(path):
-    imgs = []
-    for f in os.listdir(path):
-        ext = os.path.splitext(f)[1]
-        if ext.lower() not in valid_images:
+def renameImagesStartingAt(root_path):
+    directories = readDirectories(root_path)
+    for directory in directories:
+        renameImages(directory)
+
+    print "**************************************************************"
+    print ""
+    print "Total files without modification:", total_files_not_modified
+    print "Total files renamed:", total_files_modified
+
+def renameImages(path):
+    images = list() 
+    
+    for entry in os.listdir(path):
+        extension = os.path.splitext(entry)[1]
+        if extension.lower() not in valid_images:
             continue
 
-        full_path = os.path.join(path,f)
-        image_opened = Image.open(full_path)
-        imgs.append(image_opened)
-    return imgs
+        full_path = os.path.join(path, entry)
+        image_opened = Image.open(full_path)        
+        images.append(image_opened)
+
+    rename(images)
+
+def readDirectories(dirName):
+    directories = list()
+
+    listOfFile = os.listdir(dirName)
+    
+    # Iterate over all the entries
+    for entry in listOfFile:
+        # Create full path
+        fullPath = os.path.join(dirName, entry)
+        # If entry is a directory then get the list of files in this directory 
+        if os.path.isdir(fullPath):
+            directories.append(fullPath)
+            readDirectories(fullPath)
+
+    return directories
+            
 
 # Extract to strategy pattern
 def get_time_name_from_exif(date):
@@ -56,8 +89,8 @@ def get_time_name_from_locatime(date):
     return new_time.strftime(input_date_name_format)
 
 def rename(images):
-    total_files_not_modified = 0
-    total_files_modified = 0
+    global total_files_not_modified 
+    global total_files_modified
 
     for image in images:
         image_filename = image.filename
@@ -85,6 +118,7 @@ def rename(images):
         else:                
             if args.debug:
                 print "Skip renaming call for:", image_filename
+                total_files_not_modified += 1
                 continue
             else:
                 print "Renaming"
@@ -96,20 +130,6 @@ def rename(images):
             total_files_modified += 1
 
         print ""
-    
-    print "**************************************************************"
-    print ""
-    print "Total files without modification:", total_files_not_modified
-    print "Total files renamed:", total_files_modified
-
-def traverse(path):
-    for dirpath, _, filenames in os.walk("."):
-        for filename in [f for f in filenames if f in valid_images]:
-            print dirpath
-            print filename
-            print os.path.join(dirpath, filename)
-
-valid_images = [".jpg",".gif",".png",".tga", ".jpeg"]
 
 root_folder = ""
 input_date_name_format = "" 
@@ -134,5 +154,4 @@ print ""
 print "**************************************************************"
 print ""
 
-loaded_images = loadImages(root_folder)
-rename(loaded_images)
+renameImagesStartingAt(root_folder)
